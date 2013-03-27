@@ -44,3 +44,7 @@ Currently the WebGL context honors the Canvas element's `retinaResolutionEnabled
 For an example application, copy `./index.js` into the `App` folder. An example App folder with the Three.js [Walt CubeMap demo](http://mrdoob.github.com/three.js/examples/webgl_materials_cubemap.html) can be found here:
 
 http://phoboslab.org/files/Ejecta-ThreeJS-CubeMap.zip
+
+To bring repo up to date with Phoboslab/Ejecta:
+
+	git pull upstream master && git push origin master
