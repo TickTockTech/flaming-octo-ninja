@@ -1,13 +1,12 @@
 #import "EJBindingFacebook.h"
-#import "FacebookSDK/FBSessionTokenCachingStrategy.h"
+#import "FBSessionTokenCachingStrategy.h"
 
 @implementation EJBindingFacebook
 
-- (id)initWithContext:(JSContextRef)ctx 
-    object:(JSObjectRef)obj 
+- (id)initWithContext:(JSContextRef)ctx
     argc:(size_t)argc 
     argv:(const JSValueRef [])argv  {
-    self = [super initWithContext:ctx object:obj argc:argc argv:argv];
+    self = [super initWithContext:ctx argc:argc argv:argv];
     return self;
 }
 
@@ -43,7 +42,7 @@ EJ_BIND_FUNCTION (api, ctx, argc, argv) {
 EJ_BIND_FUNCTION (close, ctx, argc, argv) {
     [mSession close];
 
-    JSContextRef gCtx = [EJApp instance].jsGlobalContext;
+    JSContextRef gCtx = scriptView.jsGlobalContext;
     JSValueUnprotect(gCtx, mAuthResponseSubscribeCallback);
     
     return 0;
@@ -80,9 +79,7 @@ EJ_BIND_FUNCTION (login, ctx, argc, argv) {
         JSObjectRef callback = JSValueToObject(ctx, argv[0], NULL);
 
         if (callback) {
-            JSContextRef gCtx = [EJApp instance].jsGlobalContext;
-    
-            [[EJApp instance] invokeCallback: callback thisObject: NULL argc: 0 argv: nil];
+            [scriptView invokeCallback: callback thisObject: NULL argc: 0 argv: nil];
         }
     }
     return 0;
@@ -97,9 +94,7 @@ EJ_BIND_FUNCTION (logout, ctx, argc, argv) {
         JSObjectRef callback = JSValueToObject(ctx, argv[0], NULL);
 
         if (callback) {
-            JSContextRef gCtx = [EJApp instance].jsGlobalContext;
-    
-            [[EJApp instance] invokeCallback: callback thisObject: NULL argc: 0 argv: nil];
+            [scriptView invokeCallback: callback thisObject: NULL argc: 0 argv: nil];
         }
     }
     
@@ -111,7 +106,7 @@ EJ_BIND_FUNCTION (getLoginStatus, ctx, argc, argv) {
         JSObjectRef callback = JSValueToObject(ctx, argv[0], NULL);
         
         if (callback) {
-            JSContextRef gCtx = [EJApp instance].jsGlobalContext;
+            JSContextRef gCtx = scriptView.jsGlobalContext;
         
             NSString* strState;
             FBSessionState state = mSession.state;
@@ -131,7 +126,7 @@ EJ_BIND_FUNCTION (getLoginStatus, ctx, argc, argv) {
             
             //JSValueRef params[] = { JSValueMakeFromJSONString(gCtx, strState) };
             JSValueRef params[] = { NSStringToJSValue(gCtx, strState) };
-            [[EJApp instance] invokeCallback: callback thisObject: NULL argc: 1 argv: params];
+            [scriptView invokeCallback: callback thisObject: NULL argc: 1 argv: params];
         } else {
             NSLog(@"No callback or wrong number of args.");
         }
@@ -188,9 +183,9 @@ EJ_BIND_FUNCTION (getLoginStatus, ctx, argc, argv) {
             break;
         }
 
-        JSContextRef gCtx = [EJApp instance].jsGlobalContext;
+        JSContextRef gCtx = scriptView.jsGlobalContext;
         JSValueRef params[] = { NSStringToJSValue(gCtx, strState) };
-        [[EJApp instance] invokeCallback: mAuthResponseSubscribeCallback thisObject: NULL argc: 1 argv: params];
+        [scriptView invokeCallback: mAuthResponseSubscribeCallback thisObject: NULL argc: 1 argv: params];
     }
 }
 
@@ -210,7 +205,7 @@ EJ_BIND_FUNCTION (getLoginStatus, ctx, argc, argv) {
 }
 
 - (void) incomingData:(NSString*) request connection:(FBRequestConnection*) connection result:(id) result error:(NSError*) error callback:(JSObjectRef) callback {
-    JSContextRef gCtx = [EJApp instance].jsGlobalContext;
+    JSContextRef gCtx = scriptView.jsGlobalContext;
     
     NSError *jsonError; 
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:result 
@@ -221,12 +216,12 @@ EJ_BIND_FUNCTION (getLoginStatus, ctx, argc, argv) {
     if (!jsonData) {
         NSLog(@"Error parsing FB results: %@", jsonError);
 
-        [[EJApp instance] invokeCallback: mAuthResponseSubscribeCallback thisObject: NULL argc: 0 argv: nil];
+        [scriptView invokeCallback: mAuthResponseSubscribeCallback thisObject: NULL argc: 0 argv: nil];
     } else {
         jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
 
         JSValueRef params[] = { NSStringToJSValue(gCtx, jsonString) };
-        [[EJApp instance] invokeCallback: callback thisObject: NULL argc: 1 argv: params];
+        [scriptView invokeCallback: callback thisObject: NULL argc: 1 argv: params];
     }
 
     JSValueUnprotect(gCtx, callback);
