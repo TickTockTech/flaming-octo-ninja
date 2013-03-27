@@ -61,7 +61,7 @@ EJ_BIND_FUNCTION (schedule, ctx, argc, argv) {
             [self scheduleAlarm: id title: title message: message delay: delay showInGame: showInGame ];
         }
     
-        NSLog(@"NOTIFICATION SCHEDULED: #%d %@. Show in %d seconds.", id, title, delay);
+        NSLog(@"Notification: #%d %@. Show in %d seconds.", id, title, delay);
     }
     
     return 0;
@@ -72,7 +72,7 @@ EJ_BIND_FUNCTION (cancel, ctx, argc, argv) {
         NSInteger id = JSValueToNumberFast(ctx, argv[0]);
         [self cancelAlarm: id];
     
-        NSLog(@"NOTIFICATION CANCEL: #%d.", id);
+        NSLog(@"Notification cancelled: #%d.", id);
     }
     
     return 0;
@@ -81,7 +81,7 @@ EJ_BIND_FUNCTION (cancel, ctx, argc, argv) {
 EJ_BIND_FUNCTION (showNotifications, ctx, argc, argv) {
     for (UILocalNotification *notification in [[[UIApplication sharedApplication] scheduledLocalNotifications] copy]){
         NSDictionary *userInfo = notification.userInfo;
-        NSLog(@"NOTIFICATION: #%d %@", [[userInfo objectForKey:@"id"] intValue], [userInfo objectForKey:@"title"]);
+        NSLog(@"Notification: #%d %@", [[userInfo objectForKey:@"id"] intValue], [userInfo objectForKey:@"title"]);
     }
     
     return 0;
